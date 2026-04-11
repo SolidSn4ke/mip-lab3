@@ -24,15 +24,19 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Point
+      Shape
   other-modules:
       Paths_mip_lab3
   autogen-modules:
       Paths_mip_lab3
   hs-source-dirs:
       src
+      src/types
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , random
   default-language: Haskell2010
 
 executable mip-lab3-exe
@@ -47,6 +51,7 @@ executable mip-lab3-exe
   build-depends:
       base >=4.7 && <5
     , mip-lab3
+    , random
   default-language: Haskell2010
 
 test-suite mip-lab3-test
@@ -62,4 +67,5 @@ test-suite mip-lab3-test
   build-depends:
       base >=4.7 && <5
     , mip-lab3
+    , random
   default-language: Haskell2010
