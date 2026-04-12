@@ -1,6 +1,7 @@
 import Lib (generateRandomPoint)
 import Point (Point, mul)
 import Shape (Shape (..), area, contains)
+import System.Random (randomRIO)
 import Test.QuickCheck.Monadic (assert, monadicIO, run)
 import Test.Tasty
 import Test.Tasty.QuickCheck as QC
@@ -14,6 +15,7 @@ tests =
         "Tests"
         [ QC.testProperty "Contains Test" prop_pointInside
         , QC.testProperty "Check Uniform Distibution for Triangle" prop_uniformDistributionTriangle
+        , QC.testProperty "Check Uniform Distibution for Circle" prop_uniformDistributionCircle
         ]
 
 prop_pointInside :: Shape -> Property
@@ -36,5 +38,22 @@ prop_uniformDistributionTriangle p1 p2 p3 = monadicIO $ do
                     numInArea = fromIntegral . length . filter (contains t') $ points
                  in
                     (>=) (0.1 * expectedRatio) $ abs $ expectedRatio - numInArea / area t'
+            )
+            [0.1, 0.2 .. 1]
+
+prop_uniformDistributionCircle :: Point -> Point -> Property
+prop_uniformDistributionCircle n p0 = monadicIO $ do
+    r <- run $ randomRIO (0.1, 100)
+    let c = Circle n p0 r
+    points <- run $ mapM (\_ -> generateRandomPoint c) [1 :: Int .. 100000]
+    let expectedRatio = 100000 / area c
+    assert $
+        all
+            ( \x ->
+                let
+                    c' = Circle n p0 $ x * r
+                    numInArea = fromIntegral . length . filter (contains c') $ points
+                 in
+                    (>=) (0.1 * expectedRatio) $ abs $ expectedRatio - numInArea / area c'
             )
             [0.1, 0.2 .. 1]
