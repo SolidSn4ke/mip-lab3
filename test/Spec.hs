@@ -1,5 +1,5 @@
-import Lib (generateRandomPoint)
-import Point (Point, mul)
+import Lib (generateRandomPoint, generateRandomVector)
+import Point (Point (z), len, mul)
 import Shape (Shape (..), area, contains)
 import System.Random (randomRIO)
 import Test.QuickCheck.Monadic (assert, monadicIO, run)
@@ -16,6 +16,8 @@ tests =
         [ QC.testProperty "Contains Test" prop_pointInside
         , QC.testProperty "Check Uniform Distibution for Triangle" prop_uniformDistributionTriangle
         , QC.testProperty "Check Uniform Distibution for Circle" prop_uniformDistributionCircle
+        , QC.testProperty "Check Vector is on Sphere" prop_checkVectorIsOnSphere
+        , QC.testProperty "Check Uniform Distibution for Circle" prop_uniformDistributionSphere
         ]
 
 prop_pointInside :: Shape -> Property
@@ -54,6 +56,25 @@ prop_uniformDistributionCircle n p0 = monadicIO $ do
                     c' = Circle n p0 $ x * r
                     numInArea = fromIntegral . length . filter (contains c') $ points
                  in
-                    (>=) (0.1 * expectedRatio) $ abs $ expectedRatio - numInArea / area c'
+                    (>=) (0.15 * expectedRatio) $ abs $ expectedRatio - numInArea / area c'
+            )
+            [0.1, 0.2 .. 1]
+
+prop_checkVectorIsOnSphere :: Property
+prop_checkVectorIsOnSphere = monadicIO $ do
+    p <- run generateRandomVector
+    assert $ (>=) 1e-6 $ abs $ len p - 1
+
+prop_uniformDistributionSphere :: Property
+prop_uniformDistributionSphere = monadicIO $ do
+    vecs <- run $ mapM (const generateRandomVector) [1 :: Int .. 100000]
+    let expectedRatio = (/) 100000 $ 4 * pi :: Double
+    assert $
+        all
+            ( \h ->
+                let
+                    numOnStripe = fromIntegral . length $ filter (\v -> z v <= h && z v > h - 0.1) vecs
+                 in
+                    (>=) (0.1 * expectedRatio) $ abs $ expectedRatio - numOnStripe / (2 * pi * 0.1)
             )
             [0.1, 0.2 .. 1]

@@ -1,5 +1,6 @@
 module Lib (
     generateRandomPoint,
+    generateRandomVector,
 ) where
 
 import Point (Point (..), mul, normalize)
@@ -27,3 +28,11 @@ generateRandomPoint (Circle n p0 r) = do
     if (xiv - 0.5) ** 2 + (xiu - 0.5) ** 2 <= 0.25
         then return $ p0 - v `mul` r - u `mul` r + v `mul` (2 * r * xiv) + u `mul` (2 * r * xiu)
         else generateRandomPoint (Circle n p0 r)
+
+generateRandomVector :: IO Point
+generateRandomVector = do
+    xih <- randomRIO (0 :: Double, 1)
+    xiphi <- randomRIO (0 :: Double, 1)
+    let phi = 2 * pi * xiphi
+    let h = 2 * xih - 1
+    return $ Point ((*) (cos phi) $ sqrt $ 1 - h ** 2) ((*) (sin phi) $ sqrt $ 1 - h ** 2) h
