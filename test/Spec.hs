@@ -1,16 +1,40 @@
 import Lib (generateRandomPoint)
-import Shape (Shape (..), contains)
+import Point (Point, mul)
+import Shape (Shape (..), area, contains)
 import Test.QuickCheck.Monadic (assert, monadicIO, run)
 import Test.Tasty
 import Test.Tasty.QuickCheck as QC
 
 main :: IO ()
-main = defaultMain triangleTests
+main = defaultMain tests
 
-triangleTests :: TestTree
-triangleTests = testGroup "Contains Tests" [QC.testProperty "" prop_pointInside]
+tests :: TestTree
+tests =
+    testGroup
+        "Tests"
+        [ QC.testProperty "Contains Test" prop_pointInside
+        , QC.testProperty "Check Uniform Distibution for Triangle" prop_uniformDistributionTriangle
+        ]
 
 prop_pointInside :: Shape -> Property
 prop_pointInside shape = monadicIO $ do
     p <- run $ generateRandomPoint shape
     assert $ contains shape p
+
+prop_uniformDistributionTriangle :: Point -> Point -> Point -> Property
+prop_uniformDistributionTriangle p1 p2 p3 = monadicIO $ do
+    let t = Triangle p1 p2 p3
+    points <- run $ mapM (\_ -> generateRandomPoint t) [1 :: Int .. 100000]
+    let expectedRatio = 100000 / area t
+    assert $
+        all
+            ( \x ->
+                let
+                    a = (+) p3 $ flip mul x $ p1 - p3
+                    b = (+) p3 $ flip mul x $ p2 - p3
+                    t' = Triangle a b p3
+                    numInArea = fromIntegral . length . filter (contains t') $ points
+                 in
+                    (>=) (0.1 * expectedRatio) $ abs $ expectedRatio - numInArea / area t'
+            )
+            [0.1, 0.2 .. 1]
