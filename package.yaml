@@ -21,6 +21,9 @@ description:         Please see the README on GitHub at <https://github.com/gith
 dependencies:
 - base >= 4.7 && < 5
 - random
+- QuickCheck
+- tasty-quickcheck
+- tasty
 
 ghc-options:
 - -Wall
@@ -41,7 +44,8 @@ library:
 executables:
   mip-lab3-exe:
     main:                Main.hs
-    source-dirs:         app
+    source-dirs:         
+     - app
     ghc-options:
     - -threaded
     - -rtsopts
@@ -52,7 +56,8 @@ executables:
 tests:
   mip-lab3-test:
     main:                Spec.hs
-    source-dirs:         test
+    source-dirs:         
+     - test
     ghc-options:
     - -threaded
     - -rtsopts

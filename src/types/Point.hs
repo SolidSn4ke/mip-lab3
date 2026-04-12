@@ -1,6 +1,16 @@
 module Point (Point (..), dotp, len, mul) where
 
+import Test.QuickCheck.Gen (choose)
+import Test.Tasty.QuickCheck (Arbitrary (..))
+
 data Point = Point {x :: Double, y :: Double, z :: Double} deriving (Show, Eq)
+
+instance Arbitrary Point where
+    arbitrary = do
+        a <- choose (-100 :: Double, 100)
+        b <- choose (-100 :: Double, 100)
+        c <- choose (-100 :: Double, 100)
+        return $ Point a b c
 
 instance Num Point where
     (+) p1 p2 = Point (x p1 + x p2) (y p1 + y p2) (z p1 + z p2)
@@ -20,7 +30,7 @@ instance Num Point where
         d = fromIntegral n
 
 dotp :: Point -> Point -> Double
-dotp p1 p2 = sum $ map (\f -> f p1 + f p2) [x, y, z]
+dotp p1 p2 = sum $ map (\f -> f p1 * f p2) [x, y, z]
 
 len :: Point -> Double
 len p = sqrt . sum $ map (\f -> f p ** 2) [x, y, z]
