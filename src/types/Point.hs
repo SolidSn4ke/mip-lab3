@@ -1,5 +1,6 @@
-module Point (Point (..), dotp, len, mul) where
+module Point (Point (..), dotp, len, mul, normalize) where
 
+import Data.Function ((&))
 import Test.QuickCheck.Gen (choose)
 import Test.Tasty.QuickCheck (Arbitrary (..))
 
@@ -37,3 +38,6 @@ len p = sqrt . sum $ map (\f -> f p ** 2) [x, y, z]
 
 mul :: Point -> Double -> Point
 mul p v = Point (x p * v) (y p * v) (z p * v)
+
+normalize :: Point -> Point
+normalize p = len p ** (-1) & mul p

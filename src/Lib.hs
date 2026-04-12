@@ -2,8 +2,8 @@ module Lib (
     generateRandomPoint,
 ) where
 
-import Point (Point, mul)
-import Shape (Shape (Triangle))
+import Point (Point (..), mul, normalize)
+import Shape (Shape (Circle, Triangle))
 import System.Random (randomRIO)
 
 generateRandomPoint :: Shape -> IO Point
@@ -16,4 +16,14 @@ generateRandomPoint (Triangle p0 vr ur) = do
         if xiv + xiu <= 1
             then p0 + v `mul` xiv + u `mul` xiu
             else p0 + v `mul` (1 - xiv) + u `mul` (1 - xiu)
-generateRandomPoint _ = error "not implemented"
+generateRandomPoint (Circle n p0 r) = do
+    xiv <- randomRIO (0 :: Double, 1)
+    xiu <- randomRIO (0 :: Double, 1)
+    let v =
+            if x n == 0 && y n == 0
+                then Point 1 0 0
+                else normalize $ Point (negate $ y n / sqrt (y n ** 2 + x n ** 2)) (x n / sqrt (y n ** 2 + x n ** 2)) 0
+    let u = normalize $ n * v
+    if xiv ** 2 + xiu ** 2 <= 1
+        then return $ p0 - v `mul` r - u `mul` r + v `mul` (2 * r * xiv) + u `mul` (2 * r * xiu)
+        else generateRandomPoint (Circle n p0 r)
