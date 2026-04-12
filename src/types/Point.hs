@@ -4,7 +4,10 @@ import Data.Function ((&))
 import Test.QuickCheck.Gen (choose)
 import Test.Tasty.QuickCheck (Arbitrary (..))
 
-data Point = Point {x :: Double, y :: Double, z :: Double} deriving (Show, Eq)
+data Point = Point {x :: Double, y :: Double, z :: Double} deriving (Eq)
+
+instance Show Point where
+    show (Point a b c) = show $ (,,) a b c
 
 instance Arbitrary Point where
     arbitrary = do

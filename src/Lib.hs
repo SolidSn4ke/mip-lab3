@@ -24,6 +24,6 @@ generateRandomPoint (Circle n p0 r) = do
                 then Point 1 0 0
                 else normalize $ Point (negate $ y n / sqrt (y n ** 2 + x n ** 2)) (x n / sqrt (y n ** 2 + x n ** 2)) 0
     let u = normalize $ n * v
-    if xiv ** 2 + xiu ** 2 <= 1
+    if (xiv - 0.5) ** 2 + (xiu - 0.5) ** 2 <= 0.25
         then return $ p0 - v `mul` r - u `mul` r + v `mul` (2 * r * xiv) + u `mul` (2 * r * xiu)
         else generateRandomPoint (Circle n p0 r)

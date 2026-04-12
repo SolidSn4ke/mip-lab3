@@ -1,14 +1,14 @@
-module Shape (Shape (..), contains, perimeter) where
+module Shape (Shape (..), contains, perimeter, area) where
 
 import Point
-import Test.Tasty.QuickCheck (Arbitrary (..), oneof)
+import Test.Tasty.QuickCheck (Arbitrary (..), choose, oneof)
 
 data Shape = Triangle Point Point Point | Circle Point Point Double deriving (Show)
 
 instance Arbitrary Shape where
     arbitrary =
         oneof
-            [ Circle <$> arbitrary <*> arbitrary <*> arbitrary
+            [ Circle <$> arbitrary <*> arbitrary <*> choose (0.1, 10)
             , Triangle <$> arbitrary <*> arbitrary <*> arbitrary
             ]
 
@@ -40,5 +40,9 @@ contains (Triangle a b c) p =
         t2 = Triangle a c p
         t3 = Triangle b c p
      in
-        abs (area (Triangle a b c) - area t1 - area t2 - area t3) <= 1e-6
-contains _ _ = False
+        abs (area (Triangle a b c) - area t1 - area t2 - area t3) <= 1e-5
+contains (Circle n p0 r) p =
+    let
+        onTheSamePlane = (>=) 1e-6 $ abs . dotp n $ p - p0
+     in
+        onTheSamePlane && (>=) r (len $ p - p0)

@@ -11,6 +11,6 @@ triangleTests :: TestTree
 triangleTests = testGroup "Contains Tests" [QC.testProperty "" prop_pointInside]
 
 prop_pointInside :: Shape -> Property
-prop_pointInside t = monadicIO $ do
-    p <- run $ generateRandomPoint t
-    assert $ contains t p
+prop_pointInside shape = monadicIO $ do
+    p <- run $ generateRandomPoint shape
+    assert $ contains shape p
