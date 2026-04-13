@@ -1,4 +1,3 @@
-import Control.Monad (replicateM)
 import Lib (generateRandomPoint, generateRandomVector, generateRandomVectorCosDistribution)
 import Point (Point (z), dotp, len, mul, normalize)
 import Shape (Shape (..), area, contains)
@@ -83,6 +82,15 @@ prop_uniformDistributionSphere = monadicIO $ do
 
 prop_cosineDistributionSphere :: Point -> Property
 prop_cosineDistributionSphere h = monadicIO $ do
-    vecs <- run $ replicateM 100000 $ generateRandomVectorCosDistribution h
-    let cosines = map (dotp (normalize h) . normalize) vecs
-    assert $ (>=) 1e-6 $ 1 / 3 - sum cosines / fromIntegral (length cosines)
+    let n = normalize h
+    vecs <- run $ mapM (const $ generateRandomVectorCosDistribution n) [1 :: Int .. 100000]
+    let coses = map (dotp n) vecs
+    assert $
+        all
+            ( \k ->
+                let
+                    numOnStripe = fromIntegral . length $ filter (\c -> c <= k && c > k - 0.1) coses
+                 in
+                    (>=) 1e-2 $ abs $ (-) (k ** 2 - (k - 0.1) ** 2) $ numOnStripe / 100000
+            )
+            [0.1, 0.2 .. 1]

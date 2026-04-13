@@ -204,12 +204,21 @@ generateRandomVectorCosDistribution h = do
 ```haskell
 prop_cosineDistributionSphere :: Point -> Property
 prop_cosineDistributionSphere h = monadicIO $ do
-    vecs <- run $ replicateM 100000 $ generateRandomVectorCosDistribution h
-    let cosines = map (dotp (normalize h) . normalize) vecs
-    assert $ (>=) 1e-6 $ 1 / 3 - sum cosines / fromIntegral (length cosines)
+    let n = normalize h
+    vecs <- run $ mapM (const $ generateRandomVectorCosDistribution n) [1 :: Int .. 100000]
+    let coses = map (dotp n) vecs
+    assert $
+        all
+            ( \k ->
+                let
+                    numOnStripe = fromIntegral . length $ filter (\c -> c <= k && c > k - 0.1) coses
+                 in
+                    (>=) 1e-2 $ abs $ (-) (k ** 2 - (k - 0.1) ** 2) $ numOnStripe / 100000
+            )
+            [0.1, 0.2 .. 1]
 ```
 
-Проверяем, что среднее значение косинуса угла между векторм $\vec{h}$ и сгенерированными близко к $\frac{1}{3}$
+Генерируем случайные точки и считаем косинус для каждой сгенерированной точки с вектором $\vec{h}$. Разбиваем все косинусы на промежетки и считаем отношение точек в промежутке ко всем точкам и сравниваем с математическим ожиданием попадания в полоску
 
 #### 4.3 Визуализация
 
