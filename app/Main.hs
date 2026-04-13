@@ -1,6 +1,8 @@
 module Main (main) where
 
-import Lib (generateRandomVector)
+import Lib (generateRandomVectorCosDistribution)
+import Point (Point (..))
+import Text.Printf (printf)
 
 main :: IO ()
 main = mainLoop 1000
@@ -16,6 +18,7 @@ main = mainLoop 1000
 mainLoop :: Int -> IO ()
 mainLoop 0 = return ()
 mainLoop n = do
-    p <- generateRandomVector
-    print p
+    let h = Point 1 (-2) 5
+    p <- generateRandomVectorCosDistribution h
+    putStrLn $ printf "(%.3f, %.3f, %.3f)" (x p) (y p) (z p)
     mainLoop $ n - 1

@@ -1,5 +1,6 @@
-import Lib (generateRandomPoint, generateRandomVector)
-import Point (Point (z), len, mul)
+import Control.Monad (replicateM)
+import Lib (generateRandomPoint, generateRandomVector, generateRandomVectorCosDistribution)
+import Point (Point (z), dotp, len, mul, normalize)
 import Shape (Shape (..), area, contains)
 import System.Random (randomRIO)
 import Test.QuickCheck.Monadic (assert, monadicIO, run)
@@ -17,7 +18,8 @@ tests =
         , QC.testProperty "Check Uniform Distibution for Triangle" prop_uniformDistributionTriangle
         , QC.testProperty "Check Uniform Distibution for Circle" prop_uniformDistributionCircle
         , QC.testProperty "Check Vector is on Sphere" prop_checkVectorIsOnSphere
-        , QC.testProperty "Check Uniform Distibution for Circle" prop_uniformDistributionSphere
+        , QC.testProperty "Check Uniform Distibution for Sphere" prop_uniformDistributionSphere
+        , QC.testProperty "Check Cosine Distibution for Sphere" prop_cosineDistributionSphere
         ]
 
 prop_pointInside :: Shape -> Property
@@ -78,3 +80,9 @@ prop_uniformDistributionSphere = monadicIO $ do
                     (>=) (0.1 * expectedRatio) $ abs $ expectedRatio - numOnStripe / (2 * pi * 0.1)
             )
             [0.1, 0.2 .. 1]
+
+prop_cosineDistributionSphere :: Point -> Property
+prop_cosineDistributionSphere h = monadicIO $ do
+    vecs <- run $ replicateM 100000 $ generateRandomVectorCosDistribution h
+    let cosines = map (dotp (normalize h) . normalize) vecs
+    assert $ (>=) 1e-6 $ 1 / 3 - sum cosines / fromIntegral (length cosines)

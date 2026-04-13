@@ -1,6 +1,7 @@
 module Lib (
     generateRandomPoint,
     generateRandomVector,
+    generateRandomVectorCosDistribution,
 ) where
 
 import Point (Point (..), mul, normalize)
@@ -36,3 +37,8 @@ generateRandomVector = do
     let phi = 2 * pi * xiphi
     let h = 2 * xih - 1
     return $ Point ((*) (cos phi) $ sqrt $ 1 - h ** 2) ((*) (sin phi) $ sqrt $ 1 - h ** 2) h
+
+generateRandomVectorCosDistribution :: Point -> IO Point
+generateRandomVectorCosDistribution h = do
+    p <- generateRandomVector
+    return $ normalize $ h + p
